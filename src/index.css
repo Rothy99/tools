@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #f1f3f6;
+  }
+
+  .dark body {
+    background-color: #0b0f17;
+  }
+  
+  code, pre, textarea, input[type="text"].font-mono, .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+}
+
+.bg-grid-pattern {
+  background-color: #f1f3f6;
+}
+
+.dark .bg-grid-pattern {
+  background-color: #0b0f17;
+}
+
+@keyframes float-orb-1 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(100px, -60px) scale(1.2);
+    opacity: 0.7;
+  }
+}
+
+@keyframes float-orb-2 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translate(-90px, 80px) scale(1.25);
+    opacity: 0.65;
+  }
+}
+
+@keyframes float-orb-3 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate(70px, 50px) scale(0.9);
+    opacity: 0.6;
+  }
+}
+
+.animate-orb-1 {
+  animation: float-orb-1 16s ease-in-out infinite;
+}
+
+.animate-orb-2 {
+  animation: float-orb-2 22s ease-in-out infinite;
+}
+
+.animate-orb-3 {
+  animation: float-orb-3 26s ease-in-out infinite;
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.6);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(71, 85, 105, 0.8);
+}
+

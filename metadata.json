@@ -1,0 +1,6 @@
+{
+  "name": "DevStudio Super Tools",
+  "description": "Comprehensive developer toolkit with JSON formatter, JSON comparator, diff tools, encoder/decoders, regex tester, JWT debugger, and AI assistance.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
