@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import { encodeBase64, decodeBase64 } from "../../utils/encodingUtils";
 import { SAMPLE_PRESETS } from "../../data/samplePresets";
-import { Binary, Copy, Check, Upload, Image as ImageIcon, Download } from "lucide-react";
+import { Binary, Copy, Check, Upload, Image as ImageIcon, Download, Wand2 } from "lucide-react";
+import { useSessionStorageString } from "../../hooks/useSessionStorage";
 
 export const Base64Tool: React.FC = () => {
   const [mode, setMode] = useState<"text" | "image">("text");
-  const [textInput, setTextInput] = useState<string>(SAMPLE_PRESETS.base64Sample);
+  const [textInput, setTextInput] = useSessionStorageString("devstudio_base64_text_input", SAMPLE_PRESETS.base64Sample);
   const [direction, setDirection] = useState<"encode" | "decode">("encode");
   const [copied, setCopied] = useState<boolean>(false);
+  const [autoDetectMsg, setAutoDetectMsg] = useState<{ text: string; type: "success" | "info" | "warning" } | null>(null);
 
   // Image mode state
   const [imageName, setImageName] = useState<string>("");
-  const [imageDataUrl, setImageDataUrl] = useState<string>("");
+  const [imageDataUrl, setImageDataUrl] = useSessionStorageString("devstudio_base64_image_data_url", "");
 
   let outputText = "";
   let errorMsg = "";
@@ -46,6 +48,57 @@ export const Base64Tool: React.FC = () => {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleAutoDetect = () => {
+    if (mode === "image") {
+      if (imageDataUrl) {
+        setAutoDetectMsg({ text: "✨ Currently in Image / File mode with active Data URL.", type: "info" });
+        setTimeout(() => setAutoDetectMsg(null), 4000);
+        return;
+      }
+    }
+
+    const trimmed = textInput.trim();
+    if (!trimmed) {
+      setAutoDetectMsg({ text: "Input is empty. Paste text or Base64 content first.", type: "warning" });
+      setTimeout(() => setAutoDetectMsg(null), 4000);
+      return;
+    }
+
+    // 1. Check if Data URL format
+    if (trimmed.startsWith("data:")) {
+      setMode("image");
+      setImageDataUrl(trimmed);
+      setAutoDetectMsg({ text: "✨ Auto-detected Data URL! Switched to Image / File mode.", type: "success" });
+      setTimeout(() => setAutoDetectMsg(null), 4500);
+      return;
+    }
+
+    // 2. Test Base64 candidate
+    const cleanStr = trimmed.replace(/\s+/g, "");
+    const isBase64Charset = /^[A-Za-z0-9+/=\-_]+$/.test(cleanStr);
+    const looksLikeNaturalLanguage = /\b(the|and|is|for|this|you|that|with|have|are|from|not|or|be|at)\b/i.test(trimmed);
+
+    if (isBase64Charset && cleanStr.length >= 8 && !looksLikeNaturalLanguage) {
+      try {
+        const decoded = decodeBase64(cleanStr);
+        const isReadable = /^[\x09\x0A\x0D\x20-\x7E\xA0-\uFFFF]*$/.test(decoded);
+        if (decoded && isReadable && decoded !== cleanStr) {
+          setDirection("decode");
+          setAutoDetectMsg({ text: "✨ Auto-detected valid Base64 string! Switched direction to Decode.", type: "success" });
+          setTimeout(() => setAutoDetectMsg(null), 4500);
+          return;
+        }
+      } catch (e) {
+        // Decode failed
+      }
+    }
+
+    // Default to Encode
+    setDirection("encode");
+    setAutoDetectMsg({ text: "✨ Auto-detected Plain Text! Switched direction to Encode.", type: "info" });
+    setTimeout(() => setAutoDetectMsg(null), 4500);
   };
 
   return (
@@ -104,19 +157,47 @@ export const Base64Tool: React.FC = () => {
           )}
         </div>
 
-        {/* Load Preset */}
-        {mode === "text" && (
+        {/* Right Action Group: Auto-detect & Load Preset */}
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => {
-              setTextInput(SAMPLE_PRESETS.base64Sample);
-              setDirection("encode");
-            }}
-            className="px-3 py-1.5 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+            onClick={handleAutoDetect}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-xs transition-all cursor-pointer active:scale-95"
+            title="Auto-detect content type and select Encode, Decode, or Image mode"
           >
-            Load Sample Text
+            <Wand2 className="w-3.5 h-3.5" />
+            <span>Auto-detect input</span>
           </button>
-        )}
+
+          {mode === "text" && (
+            <button
+              onClick={() => {
+                setTextInput(SAMPLE_PRESETS.base64Sample);
+                setDirection("encode");
+              }}
+              className="px-3 py-1.5 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+            >
+              Load Sample Text
+            </button>
+          )}
+        </div>
       </div>
+
+      {autoDetectMsg && (
+        <div
+          className={`px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-all border ${
+            autoDetectMsg.type === "success"
+              ? "bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+              : autoDetectMsg.type === "warning"
+              ? "bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
+              : "bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800"
+          }`}
+        >
+          <span>{autoDetectMsg.text}</span>
+          <button onClick={() => setAutoDetectMsg(null)} className="opacity-70 hover:opacity-100 cursor-pointer font-bold px-1">
+            ✕
+          </button>
+        </div>
+      )}
 
       {mode === "text" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -128,9 +209,9 @@ export const Base64Tool: React.FC = () => {
             <textarea
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
-              rows={12}
+              rows={36}
               placeholder={direction === "encode" ? "Enter text to Base64 encode..." : "Enter Base64 string to decode..."}
-              className="w-full p-4 font-mono text-xs bg-transparent text-slate-900 dark:text-slate-100 focus:outline-hidden resize-none"
+              className="w-full p-4 font-mono text-xs bg-transparent text-slate-900 dark:text-slate-100 focus:outline-hidden resize-none min-h-[700px]"
             />
           </div>
 
@@ -146,7 +227,7 @@ export const Base64Tool: React.FC = () => {
                 <span>{copied ? "Copied" : "Copy"}</span>
               </button>
             </div>
-            <div className="p-4 font-mono text-xs text-slate-900 dark:text-slate-100 overflow-y-auto max-h-[380px] whitespace-pre-wrap leading-relaxed">
+            <div className="p-4 font-mono text-xs text-slate-900 dark:text-slate-100 overflow-y-auto min-h-[700px] max-h-[1100px] whitespace-pre-wrap leading-relaxed">
               {errorMsg ? (
                 <div className="text-red-500 font-medium">⚠️ {errorMsg}</div>
               ) : (

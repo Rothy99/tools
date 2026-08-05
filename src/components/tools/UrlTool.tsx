@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from "react";
 import { parseUrlQueryParams } from "../../utils/encodingUtils";
 import { SAMPLE_PRESETS } from "../../data/samplePresets";
+import { useSessionStorageString } from "../../hooks/useSessionStorage";
 import { Link, Copy, Check, Table, Globe } from "lucide-react";
 
 export const UrlTool: React.FC = () => {
-  const [urlInput, setUrlInput] = useState<string>(SAMPLE_PRESETS.urlSample);
+  const [urlInput, setUrlInput] = useSessionStorageString("devstudio_url_input", SAMPLE_PRESETS.urlSample);
   const [copied, setCopied] = useState<boolean>(false);
 
   const parsedUrl = useMemo(() => {
@@ -60,9 +61,9 @@ export const UrlTool: React.FC = () => {
         <textarea
           value={urlInput}
           onChange={(e) => setUrlInput(e.target.value)}
-          rows={3}
+          rows={14}
           placeholder="Paste URL or parameter string..."
-          className="w-full p-3 font-mono text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-hidden"
+          className="w-full p-3 font-mono text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-hidden min-h-[260px]"
         />
       </div>
 

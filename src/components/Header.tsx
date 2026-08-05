@@ -136,7 +136,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-slate-200/70 dark:border-slate-800/70 bg-white/75 dark:bg-slate-900/75 backdrop-blur-md px-3 sm:px-4 lg:px-8 py-2.5 sm:py-3">
+      <header className="sticky top-0 z-40 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 sm:px-4 lg:px-8 py-2.5 sm:py-3 shadow-xs">
         <div className="max-w-[1720px] mx-auto flex items-center justify-between gap-2 sm:gap-4">
           {/* Brand */}
           <div

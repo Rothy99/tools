@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from "react";
 import { parseCronExpression } from "../../utils/codeUtils";
 import { SAMPLE_PRESETS } from "../../data/samplePresets";
+import { useSessionStorageString } from "../../hooks/useSessionStorage";
 import { Clock, Calendar, Check, Copy } from "lucide-react";
 
 export const CronTool: React.FC = () => {
-  const [cronInput, setCronInput] = useState<string>(SAMPLE_PRESETS.cronSample);
+  const [cronInput, setCronInput] = useSessionStorageString("devstudio_cron_input", SAMPLE_PRESETS.cronSample);
   const [copied, setCopied] = useState<boolean>(false);
 
   const parsed = useMemo(() => {

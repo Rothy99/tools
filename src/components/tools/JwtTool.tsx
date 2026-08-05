@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from "react";
 import { parseJwtToken } from "../../utils/encodingUtils";
 import { SAMPLE_PRESETS } from "../../data/samplePresets";
+import { useSessionStorageString } from "../../hooks/useSessionStorage";
 import { KeyRound, ShieldAlert, ShieldCheck, Clock, Copy, Check } from "lucide-react";
 
 export const JwtTool: React.FC = () => {
-  const [tokenInput, setTokenInput] = useState<string>(SAMPLE_PRESETS.jwtSample);
+  const [tokenInput, setTokenInput] = useSessionStorageString("devstudio_jwt_token_input", SAMPLE_PRESETS.jwtSample);
   const [copied, setCopied] = useState<boolean>(false);
 
   const parsedJwt = useMemo(() => {
@@ -58,9 +59,9 @@ export const JwtTool: React.FC = () => {
           <textarea
             value={tokenInput}
             onChange={(e) => setTokenInput(e.target.value)}
-            rows={14}
+            rows={32}
             placeholder="Paste JWT (eyJhbGciOi...)..."
-            className="w-full p-4 font-mono text-xs bg-transparent text-slate-900 dark:text-slate-100 focus:outline-hidden resize-none break-all leading-relaxed"
+            className="w-full p-4 font-mono text-xs bg-transparent text-slate-900 dark:text-slate-100 focus:outline-hidden resize-none break-all leading-relaxed min-h-[650px]"
           />
 
           {/* Validation Status Badge */}
@@ -112,8 +113,18 @@ export const JwtTool: React.FC = () => {
 
           {/* Header Panel */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs">
-            <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-red-600 dark:text-red-400">
-              Header (Algorithm & Token Type)
+            <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-red-600 dark:text-red-400 flex justify-between items-center">
+              <span>Header (Algorithm & Token Type)</span>
+              {parsedJwt.header && (
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(JSON.stringify(parsedJwt.header, null, 2));
+                  }}
+                  className="flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer"
+                >
+                  <Copy className="w-3 h-3" /> Copy Header
+                </button>
+              )}
             </div>
             <pre className="p-4 font-mono text-xs text-slate-900 dark:text-slate-100 overflow-x-auto">
               {parsedJwt.header ? JSON.stringify(parsedJwt.header, null, 2) : "// Invalid Header"}
@@ -122,10 +133,18 @@ export const JwtTool: React.FC = () => {
 
           {/* Payload Panel */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs">
-            <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-purple-600 dark:text-purple-400">
-              Payload Claims (Data)
+            <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-purple-600 dark:text-purple-400 flex justify-between items-center">
+              <span>Payload Claims (Data)</span>
+              {parsedJwt.payload && (
+                <button
+                  onClick={handleCopyPayload}
+                  className="flex items-center gap-1 text-[11px] font-medium text-purple-600 dark:text-purple-400 hover:underline cursor-pointer"
+                >
+                  <Copy className="w-3 h-3" /> {copied ? "Copied!" : "Copy Payload"}
+                </button>
+              )}
             </div>
-            <pre className="p-4 font-mono text-xs text-slate-900 dark:text-slate-100 overflow-x-auto max-h-60">
+            <pre className="p-4 font-mono text-xs text-slate-900 dark:text-slate-100 overflow-x-auto min-h-[500px] max-h-[900px]">
               {parsedJwt.payload ? JSON.stringify(parsedJwt.payload, null, 2) : "// Invalid Payload"}
             </pre>
           </div>

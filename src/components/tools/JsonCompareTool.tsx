@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { compareJsonObjects } from "../../utils/diffUtils";
 import { parseJsonSafe } from "../../utils/jsonUtils";
 import { SAMPLE_PRESETS } from "../../data/samplePresets";
+import { useSessionStorageString } from "../../hooks/useSessionStorage";
 import { JsonDiffResult } from "../../types";
 import {
   GitCompare,
@@ -15,8 +16,8 @@ import {
 } from "lucide-react";
 
 export const JsonCompareTool: React.FC = () => {
-  const [jsonA, setJsonA] = useState<string>(SAMPLE_PRESETS.jsonCompareA);
-  const [jsonB, setJsonB] = useState<string>(SAMPLE_PRESETS.jsonCompareB);
+  const [jsonA, setJsonA] = useSessionStorageString("devstudio_json_compare_a", SAMPLE_PRESETS.jsonCompareA);
+  const [jsonB, setJsonB] = useSessionStorageString("devstudio_json_compare_b", SAMPLE_PRESETS.jsonCompareB);
   const [filterType, setFilterType] = useState<string>("diffs");
   const [copied, setCopied] = useState<boolean>(false);
 
@@ -140,9 +141,9 @@ export const JsonCompareTool: React.FC = () => {
           <textarea
             value={jsonA}
             onChange={(e) => setJsonA(e.target.value)}
-            rows={10}
+            rows={34}
             placeholder="Paste Original JSON A..."
-            className="w-full p-4 font-mono text-xs bg-transparent text-slate-900 dark:text-slate-100 focus:outline-hidden resize-none"
+            className="w-full p-4 font-mono text-xs bg-transparent text-slate-900 dark:text-slate-100 focus:outline-hidden resize-none min-h-[680px]"
           />
           {parsedA.error && (
             <div className="p-2.5 bg-red-50 text-red-600 text-xs border-t border-red-200 font-mono">
@@ -165,9 +166,9 @@ export const JsonCompareTool: React.FC = () => {
           <textarea
             value={jsonB}
             onChange={(e) => setJsonB(e.target.value)}
-            rows={10}
+            rows={34}
             placeholder="Paste New JSON B..."
-            className="w-full p-4 font-mono text-xs bg-transparent text-slate-900 dark:text-slate-100 focus:outline-hidden resize-none"
+            className="w-full p-4 font-mono text-xs bg-transparent text-slate-900 dark:text-slate-100 focus:outline-hidden resize-none min-h-[680px]"
           />
           {parsedB.error && (
             <div className="p-2.5 bg-red-50 text-red-600 text-xs border-t border-red-200 font-mono">
@@ -183,9 +184,17 @@ export const JsonCompareTool: React.FC = () => {
           <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
             <GitCompare className="w-4 h-4 text-indigo-500" /> Comparison Differences ({filteredDiffs.length})
           </h3>
-          <span className="text-xs text-slate-400">
-            {stats.totalDiffs === 0 ? "Both JSON objects are identical!" : `${stats.totalDiffs} total changes found`}
-          </span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleCopyDiffSummary}
+              className="flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+            >
+              <Copy className="w-3.5 h-3.5" /> {copied ? "Copied Diff" : "Copy Differences"}
+            </button>
+            <span className="text-xs text-slate-400">
+              {stats.totalDiffs === 0 ? "Both JSON objects are identical!" : `${stats.totalDiffs} total changes found`}
+            </span>
+          </div>
         </div>
 
         <div className="p-4 overflow-x-auto">

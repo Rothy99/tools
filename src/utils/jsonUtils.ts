@@ -1,22 +1,64 @@
 import { JsonTreeNode } from "../types";
 
-export function parseJsonSafe(raw: string): { data: any; error: string | null } {
+function recursivelyParseJson(val: any): any {
+  if (typeof val === "string") {
+    const trimmed = val.trim();
+    if (
+      (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+      (trimmed.startsWith("[") && trimmed.endsWith("]"))
+    ) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        return recursivelyParseJson(parsed);
+      } catch (e) {
+        return val;
+      }
+    }
+    return val;
+  }
+  if (Array.isArray(val)) {
+    return val.map((item) => recursivelyParseJson(item));
+  }
+  if (typeof val === "object" && val !== null) {
+    const res: Record<string, any> = {};
+    for (const k of Object.keys(val)) {
+      res[k] = recursivelyParseJson(val[k]);
+    }
+    return res;
+  }
+  return val;
+}
+
+export function parseJsonSafe(
+  raw: string,
+  unescapeEmbedded: boolean = true
+): { data: any; error: string | null } {
   try {
-    const data = JSON.parse(raw);
+    let data = JSON.parse(raw);
+    if (unescapeEmbedded) {
+      data = recursivelyParseJson(data);
+    }
     return { data, error: null };
   } catch (err: any) {
     return { data: null, error: err.message || "Invalid JSON syntax" };
   }
 }
 
-export function formatJsonString(raw: string, indent: number | string = 2): string {
-  const { data, error } = parseJsonSafe(raw);
+export function formatJsonString(
+  raw: string,
+  indent: number | string = 2,
+  unescapeEmbedded: boolean = true
+): string {
+  const { data, error } = parseJsonSafe(raw, unescapeEmbedded);
   if (error) throw new Error(error);
   return JSON.stringify(data, null, indent);
 }
 
-export function minifyJsonString(raw: string): string {
-  const { data, error } = parseJsonSafe(raw);
+export function minifyJsonString(
+  raw: string,
+  unescapeEmbedded: boolean = true
+): string {
+  const { data, error } = parseJsonSafe(raw, unescapeEmbedded);
   if (error) throw new Error(error);
   return JSON.stringify(data);
 }

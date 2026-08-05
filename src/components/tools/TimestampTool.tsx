@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useSessionStorageString } from "../../hooks/useSessionStorage";
 import { Calendar, Clock, Copy, Check, RefreshCw } from "lucide-react";
 
 export const TimestampTool: React.FC = () => {
   const [nowSec, setNowSec] = useState<number>(Math.floor(Date.now() / 1000));
-  const [timestampInput, setTimestampInput] = useState<string>(String(Math.floor(Date.now() / 1000)));
-  const [dateInput, setDateInput] = useState<string>(new Date().toISOString().slice(0, 16));
+  const [timestampInput, setTimestampInput] = useSessionStorageString("devstudio_timestamp_input", String(Math.floor(Date.now() / 1000)));
+  const [dateInput, setDateInput] = useSessionStorageString("devstudio_date_input", new Date().toISOString().slice(0, 16));
 
   const [copied, setCopied] = useState<string | null>(null);
 

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { md5, computeSubtleHash } from "../../utils/securityUtils";
+import { useSessionStorageString } from "../../hooks/useSessionStorage";
 import { ShieldCheck, Copy, Check, CheckCircle2, XCircle } from "lucide-react";
 
 export const HashTool: React.FC = () => {
-  const [input, setInput] = useState<string>("DevStudio Super Tools 2026");
+  const [input, setInput] = useSessionStorageString("devstudio_hash_input", "DevStudio Super Tools 2026");
   const [expectedHash, setExpectedHash] = useState<string>("");
 
   const [md5Hash, setMd5Hash] = useState<string>("");

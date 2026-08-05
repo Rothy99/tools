@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from "react";
 import { hexToRgb, rgbToHsl } from "../../utils/codeUtils";
 import { SAMPLE_PRESETS } from "../../data/samplePresets";
+import { useSessionStorageString } from "../../hooks/useSessionStorage";
 import { Palette, Copy, Check } from "lucide-react";
 
 export const ColorTool: React.FC = () => {
-  const [hex, setHex] = useState<string>(SAMPLE_PRESETS.colorSample);
+  const [hex, setHex] = useSessionStorageString("devstudio_color_hex", SAMPLE_PRESETS.colorSample);
   const [copiedFormat, setCopiedFormat] = useState<string | null>(null);
 
   const rgb = useMemo(() => hexToRgb(hex), [hex]);
