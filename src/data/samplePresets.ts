@@ -88,5 +88,28 @@ Reach out to john.doe.2026@sub.domain.co.uk today.`,
   base64Sample: `Hello mytoolsbox! 🚀
 Welcome to the Super Web Tool suite for JSON formatting, JSON diff, JWT decoding, Hash calculation, and more!`,
 
+  jsonBatchSample: `[
+  "{\\"service\\": \\"auth-api\\", \\"port\\": 8000, \\"status\\": \\"online\\", \\"debug\\": false}",
+  "{\\"service\\": \\"payment-gateway\\", \\"currency\\": \\"USD\\", \\"retry\\": 3}",
+  "{\\"service\\": \\"database-cluster\\", \\"nodes\\": [\\"db1\\", \\"db2\\"], \\"max_conn\\": 100}",
+  "{\\"service\\": \\"cache-redis\\", \\"memory\\": \\"2GB\\", \\"eviction\\": \\"LRU\\"}"
+]`,
+
+  jsonBatchObjectsSample: `[
+  { "id": 101, "name": "Auth Service", "status": "healthy", "uptime": "99.98%" },
+  { "id": 102, "name": "Payment Gateway", "status": "healthy", "uptime": "99.95%" },
+  { "id": 103, "name": "Search Engine", "status": "degraded", "uptime": "98.20%" }
+]`,
+
+  base64BatchSample: `mytoolsbox developer suite
+https://mytoolsbox.specsrank.site
+API Secret Token 2026
+JSON Formatter & Base64 Batch Mode`,
+
+  base64BatchDecodedSample: `bXl0b29sc2JveCBkZXZlbG9wZXIgc3VpdGU=
+aHR0cHM6Ly9teXRvb2xzYm94LnNwZWNzcmFuay5zaXRl
+QVBJIFNlY3JldCBUb2tlbiAyMDI2
+SlNPTiBGb3JtYXR0ZXIgJiBCYXNlNjQgQmF0Y2ggTW9kZQ==`,
+
   colorSample: `#6366f1`,
 };

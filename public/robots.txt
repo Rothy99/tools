@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://devstudio.dev/sitemap.xml
+Sitemap: https://mytoolsbox.specsrank.site/sitemap.xml

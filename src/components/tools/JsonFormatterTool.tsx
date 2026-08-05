@@ -29,6 +29,7 @@ import {
   Edit3,
   CheckCircle2,
   AlertCircle,
+  Layers,
 } from "lucide-react";
 
 export type ViewTab = "editor" | "tree" | "yaml" | "csv" | "xml";
@@ -68,14 +69,101 @@ export const JsonFormatterTool: React.FC = () => {
   const [unescapeEmbedded, setUnescapeEmbedded] = useState<boolean>(true);
   const [searchFilter, setSearchFilter] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [collapsedPaths, setCollapsedPaths] = useState<Record<string, boolean>>({});
   const [autoDetectMsg, setAutoDetectMsg] = useState<{ text: string; type: "success" | "info" | "warning" } | null>(null);
+
+  // Batch Mode State
+  const [isBatchMode, setIsBatchMode] = useState<boolean>(false);
 
   const lineNumbersRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
 
   const parsed = useMemo(() => parseJsonSafe(input, unescapeEmbedded), [input, unescapeEmbedded]);
+
+  // Batch Mode Items Calculation
+  const batchItems = useMemo(() => {
+    if (!isBatchMode) return [];
+    const trimmed = input.trim();
+    if (!trimmed) return [];
+
+    let rawList: any[] = [];
+    if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+      try {
+        const parsedArray = JSON.parse(trimmed);
+        if (Array.isArray(parsedArray)) {
+          rawList = parsedArray;
+        } else {
+          rawList = trimmed.split("\n").filter((l) => l.trim().length > 0);
+        }
+      } catch {
+        rawList = trimmed.split("\n").filter((l) => l.trim().length > 0);
+      }
+    } else {
+      rawList = trimmed.split("\n").filter((l) => l.trim().length > 0);
+    }
+
+    return rawList.map((raw, idx) => {
+      let parsedData = null;
+      let formattedJson = "";
+      let error: string | null = null;
+
+      if (typeof raw === "string") {
+        const p = parseJsonSafe(raw, unescapeEmbedded);
+        if (p.error) {
+          error = p.error;
+          formattedJson = raw;
+        } else {
+          parsedData = p.data;
+          formattedJson = formatJsonString(raw, indentSize, unescapeEmbedded);
+        }
+      } else {
+        parsedData = raw;
+        try {
+          formattedJson = JSON.stringify(raw, null, indentSize);
+        } catch (err: any) {
+          error = err.message;
+          formattedJson = String(raw);
+        }
+      }
+
+      return {
+        id: idx + 1,
+        rawInput: typeof raw === "string" ? raw : JSON.stringify(raw),
+        parsedData,
+        formattedJson,
+        error,
+      };
+    });
+  }, [isBatchMode, input, indentSize, unescapeEmbedded]);
+
+  const batchCombinedOutput = useMemo(() => {
+    if (!isBatchMode || batchItems.length === 0) return "";
+    const dataArray = batchItems.map((item) => (item.error ? { error: item.error, raw: item.rawInput } : item.parsedData));
+    try {
+      return JSON.stringify(dataArray, null, indentSize);
+    } catch {
+      return batchItems.map((i) => i.formattedJson).join("\n");
+    }
+  }, [isBatchMode, batchItems, indentSize]);
+
+  const batchStats = useMemo(() => {
+    if (!isBatchMode) return { total: 0, valid: 0, failed: 0 };
+    const total = batchItems.length;
+    const failed = batchItems.filter((i) => i.error !== null).length;
+    const valid = total - failed;
+    return { total, valid, failed };
+  }, [isBatchMode, batchItems]);
+
+  const effectiveParsed = useMemo(() => {
+    if (isBatchMode) {
+      if (batchItems.length === 0) return { data: null, error: "Empty batch input" };
+      const dataArray = batchItems.map((item) => (item.error ? { error: item.error, raw: item.rawInput } : item.parsedData));
+      return { data: dataArray, error: null };
+    }
+    return parsed;
+  }, [isBatchMode, batchItems, parsed]);
 
   const handleAutoDetect = () => {
     const trimmed = input.trim();
@@ -106,7 +194,7 @@ export const JsonFormatterTool: React.FC = () => {
       }
     }
 
-    // 2. Check if Escaped / Stringified JSON (e.g., contains escaped quotes or newlines)
+    // 2. Check if Escaped / Stringified JSON
     const isEscapedCandidate = (trimmed.startsWith('"') && trimmed.endsWith('"')) || trimmed.includes('\\"') || trimmed.includes('\\n') || trimmed.includes('\\t');
     if (isEscapedCandidate) {
       const unescapedResult = parseJsonSafe(trimmed, true);
@@ -140,7 +228,7 @@ export const JsonFormatterTool: React.FC = () => {
       return;
     }
 
-    // 5. Check if CSV / TSV (multiple lines with commas or tabs)
+    // 5. Check if CSV / TSV
     if (trimmed.includes("\n") && (trimmed.includes(",") || trimmed.includes("\t")) && !trimmed.startsWith("{") && !trimmed.startsWith("[")) {
       setActiveTab("csv");
       setAutoDetectMsg({ text: "✨ Auto-detected: CSV / TSV tabular data! Switched view to CSV mode.", type: "info" });
@@ -182,6 +270,11 @@ export const JsonFormatterTool: React.FC = () => {
   };
 
   const handleFormatInPlace = () => {
+    if (isBatchMode) {
+      if (batchItems.length === 0) return;
+      setInput(batchCombinedOutput);
+      return;
+    }
     if (parsed.error) return;
     try {
       const formatted = formatJsonString(input, indentSize, unescapeEmbedded);
@@ -192,6 +285,12 @@ export const JsonFormatterTool: React.FC = () => {
   };
 
   const handleMinifyInPlace = () => {
+    if (isBatchMode) {
+      if (batchItems.length === 0) return;
+      const minifiedArray = batchItems.map((i) => (i.error ? i.rawInput : i.parsedData));
+      setInput(JSON.stringify(minifiedArray));
+      return;
+    }
     if (parsed.error) return;
     try {
       const minified = minifyJsonString(input, unescapeEmbedded);
@@ -202,26 +301,31 @@ export const JsonFormatterTool: React.FC = () => {
   };
 
   const convertedOutput = useMemo(() => {
-    if (parsed.error || parsed.data === null) return "";
+    if (effectiveParsed.error || effectiveParsed.data === null) return "";
     try {
-      if (activeTab === "yaml") return jsonToYaml(parsed.data);
-      if (activeTab === "xml") return jsonToXml(parsed.data);
-      if (activeTab === "csv") return jsonToCsv(parsed.data);
+      if (activeTab === "yaml") return jsonToYaml(effectiveParsed.data);
+      if (activeTab === "xml") return jsonToXml(effectiveParsed.data);
+      if (activeTab === "csv") return jsonToCsv(effectiveParsed.data);
     } catch (err: any) {
       return `Error generating format: ${err.message}`;
     }
     return "";
-  }, [input, activeTab, parsed]);
+  }, [activeTab, effectiveParsed]);
 
   const treeData = useMemo(() => {
-    if (parsed.error || parsed.data === null) return null;
-    return buildJsonTree(parsed.data);
-  }, [parsed]);
+    if (effectiveParsed.error || effectiveParsed.data === null) return null;
+    return buildJsonTree(effectiveParsed.data);
+  }, [effectiveParsed]);
 
-  const handleCopy = (textToCopy: string) => {
+  const handleCopy = (textToCopy: string, index?: number) => {
     navigator.clipboard.writeText(textToCopy);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (index !== undefined) {
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } else {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const handleDownload = () => {
@@ -320,8 +424,7 @@ export const JsonFormatterTool: React.FC = () => {
   };
 
   return (
-    /* SINGLE UNIFIED SECTION CONTAINER */
-    <div className="flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+    <div className="flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
       {/* UNIFIED SINGLE-ROW TOOLBAR HEADER (STICKY ON SCROLL) */}
       <div className="sticky top-[57px] sm:top-[61px] z-20 p-2.5 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 overflow-x-auto whitespace-nowrap scrollbar-none rounded-t-2xl">
         {/* Left Group: View Tabs + Metrics + Status Badge */}
@@ -331,7 +434,7 @@ export const JsonFormatterTool: React.FC = () => {
               <div className="space-y-1">
                 <div className="font-bold text-indigo-300">JSON Studio Features</div>
                 <div className="text-[11px] leading-relaxed text-slate-200">
-                  Includes real-time syntax checking, auto-repairing bad quotes/trailing commas, interactive tree viewer, and 1-click export to YAML, XML, or CSV.
+                  Includes real-time syntax checking, auto-repairing bad quotes/trailing commas, interactive tree viewer, 1-click export, and simultaneous batch processing for arrays.
                 </div>
               </div>
             }
@@ -359,15 +462,38 @@ export const JsonFormatterTool: React.FC = () => {
             ))}
           </div>
 
-          {/* Removed stats element */}
+          {/* Batch Mode Toggle Button */}
+          <button
+            onClick={() => {
+              const nextState = !isBatchMode;
+              setIsBatchMode(nextState);
+              if (nextState && input === SAMPLE_PRESETS.jsonFormatter) {
+                setInput(SAMPLE_PRESETS.jsonBatchSample);
+              }
+            }}
+            className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shrink-0 ${
+              isBatchMode
+                ? "bg-purple-600 text-white border-purple-500 shadow-xs ring-2 ring-purple-500/30"
+                : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+            }`}
+            title="Toggle Batch Processing mode to process an array or list of JSON payloads simultaneously"
+          >
+            <Layers className="w-3.5 h-3.5 text-purple-300" />
+            <span>Batch Mode</span>
+            {isBatchMode && (
+              <span className="bg-white/20 px-1.5 py-0.2 text-[10px] rounded-full uppercase tracking-wider font-semibold">
+                Active
+              </span>
+            )}
+          </button>
 
-          {parsed.error && (
+          {!isBatchMode && parsed.error && (
             <span className="flex items-center gap-1 px-2 py-0.5 text-xs font-semibold bg-red-100 dark:bg-red-950/80 text-red-600 dark:text-red-300 rounded-lg border border-red-200 dark:border-red-900">
               <AlertCircle className="w-3.5 h-3.5" />
               Invalid JSON
             </span>
           )}
-          {!parsed.error && input.trim().length > 0 && (
+          {!isBatchMode && !parsed.error && input.trim().length > 0 && (
             <span className="flex items-center gap-1 px-2 py-0.5 text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 rounded-lg border border-emerald-200 dark:border-emerald-900">
               <CheckCircle2 className="w-3.5 h-3.5" />
               Valid JSON
@@ -399,26 +525,41 @@ export const JsonFormatterTool: React.FC = () => {
             <span>Auto-detect input</span>
           </button>
 
+          {isBatchMode && (
+            <button
+              onClick={() => {
+                if (input === SAMPLE_PRESETS.jsonBatchSample) {
+                  setInput(SAMPLE_PRESETS.jsonBatchObjectsSample);
+                } else {
+                  setInput(SAMPLE_PRESETS.jsonBatchSample);
+                }
+              }}
+              className="px-2.5 py-1.5 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap"
+            >
+              Load Batch Sample
+            </button>
+          )}
+
           {activeTab === "editor" && (
             <>
               <button
                 onClick={handleFormatInPlace}
-                disabled={Boolean(parsed.error)}
+                disabled={!isBatchMode && Boolean(parsed.error)}
                 className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 disabled:opacity-50 text-white shadow-xs transition-all cursor-pointer whitespace-nowrap"
                 title="Format JSON with indentation"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Format</span>
+                <span>{isBatchMode ? "Format Batch" : "Format"}</span>
               </button>
 
               <button
                 onClick={handleMinifyInPlace}
-                disabled={Boolean(parsed.error)}
+                disabled={!isBatchMode && Boolean(parsed.error)}
                 className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-all cursor-pointer whitespace-nowrap"
                 title="Minify JSON"
               >
                 <Minimize2 className="w-3.5 h-3.5" />
-                <span>Minify</span>
+                <span>{isBatchMode ? "Minify Batch" : "Minify"}</span>
               </button>
 
               <label className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer select-none hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors whitespace-nowrap">
@@ -436,7 +577,7 @@ export const JsonFormatterTool: React.FC = () => {
                 onChange={(e) => {
                   const size = Number(e.target.value);
                   setIndentSize(size);
-                  if (!parsed.error && input) {
+                  if (!isBatchMode && !parsed.error && input) {
                     try {
                       setInput(formatJsonString(input, size, unescapeEmbedded));
                     } catch (e) {}
@@ -451,7 +592,7 @@ export const JsonFormatterTool: React.FC = () => {
           )}
 
           <button
-            onClick={() => handleCopy(activeTab === "editor" ? input : convertedOutput || input)}
+            onClick={() => handleCopy(activeTab === "editor" ? (isBatchMode ? batchCombinedOutput : input) : convertedOutput || input)}
             className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer transition-colors whitespace-nowrap"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
@@ -476,6 +617,33 @@ export const JsonFormatterTool: React.FC = () => {
         </div>
       </div>
 
+      {/* Batch Mode Summary Bar */}
+      {isBatchMode && (
+        <div className="px-4 py-3 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/80 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-3">
+            <span className="font-bold text-purple-800 dark:text-purple-300 flex items-center gap-1.5">
+              <Layers className="w-4 h-4 text-purple-500" /> JSON Batch Processing Summary:
+            </span>
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-1 bg-purple-100 dark:bg-purple-900/80 text-purple-700 dark:text-purple-200 rounded-lg font-semibold">
+                Total: {batchStats.total} items
+              </span>
+              <span className="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 rounded-lg font-semibold flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Valid JSON: {batchStats.valid}
+              </span>
+              {batchStats.failed > 0 && (
+                <span className="px-2.5 py-1 bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 rounded-lg font-semibold flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" /> Errors: {batchStats.failed}
+                </span>
+              )}
+            </div>
+          </div>
+          <span className="text-slate-500 dark:text-slate-400 text-[11px]">
+            Formats an array `[item1, item2]` or line-separated JSON payloads simultaneously
+          </span>
+        </div>
+      )}
+
       {autoDetectMsg && (
         <div
           className={`px-4 py-2 text-xs font-semibold flex items-center justify-between transition-all ${
@@ -494,10 +662,10 @@ export const JsonFormatterTool: React.FC = () => {
       )}
 
       {/* SINGLE SECTION WORKSPACE CANVAS */}
-      <div className="min-h-[950px] h-[calc(100vh-80px)] max-h-[1600px] flex flex-col relative overflow-hidden bg-[#0b0f19] rounded-b-2xl">
+      <div className="min-h-[700px] h-[calc(100vh-180px)] max-h-[1400px] flex flex-col relative overflow-hidden bg-[#0b0f19] rounded-b-2xl">
         {/* Floating Canvas Copy to Clipboard Button */}
         <button
-          onClick={() => handleCopy(activeTab === "editor" ? input : convertedOutput || input)}
+          onClick={() => handleCopy(activeTab === "editor" ? (isBatchMode ? batchCombinedOutput : input) : convertedOutput || input)}
           className="absolute top-3 right-4 z-20 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700/80 backdrop-blur-md shadow-lg transition-all cursor-pointer opacity-80 hover:opacity-100"
           title="Copy workspace content to clipboard"
         >
@@ -534,13 +702,17 @@ export const JsonFormatterTool: React.FC = () => {
                 value={input}
                 onScroll={handleScroll}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Paste or type your JSON here..."
+                placeholder={
+                  isBatchMode
+                    ? "Paste a JSON array of stringified/escaped JSON items or line-separated JSON..."
+                    : "Paste or type your JSON here..."
+                }
                 spellCheck={false}
                 className="absolute inset-0 w-full h-full p-4 font-mono text-xs text-transparent caret-indigo-400 bg-transparent focus:outline-hidden resize-none leading-[22px] whitespace-pre tab-4 overflow-auto border-none scroll-smooth selection:bg-indigo-500/30 selection:text-transparent"
               />
             </div>
 
-            {parsed.error && (
+            {!isBatchMode && parsed.error && (
               <div className="absolute bottom-0 left-0 right-0 p-3 bg-red-950/95 text-red-200 text-xs border-t border-red-800 font-mono flex items-center gap-2 backdrop-blur-xs z-10 shadow-lg">
                 <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
                 <span><strong>Syntax Error:</strong> {parsed.error}</span>
@@ -549,7 +721,7 @@ export const JsonFormatterTool: React.FC = () => {
           </div>
         ) : activeTab === "tree" ? (
           <div className="p-6 overflow-auto h-full bg-[#0b0f19] text-slate-100 scroll-smooth">
-            {parsed.error ? (
+            {!isBatchMode && parsed.error ? (
               <div className="text-center py-24 text-slate-400 text-xs font-mono flex flex-col items-center gap-2">
                 <AlertCircle className="w-8 h-8 text-amber-500" />
                 <span>Cannot display tree view because JSON contains syntax errors.</span>
@@ -565,7 +737,7 @@ export const JsonFormatterTool: React.FC = () => {
           </div>
         ) : (
           <div className="p-6 overflow-auto h-full bg-[#0b0f19] text-slate-100 font-mono text-xs scroll-smooth">
-            {parsed.error ? (
+            {!isBatchMode && parsed.error ? (
               <div className="text-center py-24 text-slate-400 text-xs font-mono flex flex-col items-center gap-2">
                 <AlertCircle className="w-8 h-8 text-amber-500" />
                 <span>Cannot convert format because JSON contains syntax errors.</span>
@@ -579,6 +751,70 @@ export const JsonFormatterTool: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Itemized Batch Cards Breakdown in Batch Mode */}
+      {isBatchMode && batchItems.length > 0 && (
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3 shadow-2xs">
+          <h3 className="text-xs font-bold text-slate-900 dark:text-white flex items-center justify-between">
+            <span>Itemized Batch Breakdown ({batchItems.length} Processed Items)</span>
+            <span className="text-[11px] font-normal text-slate-500">
+              Copy formatted output for individual items below
+            </span>
+          </h3>
+
+          <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+            {batchItems.map((item) => (
+              <div
+                key={item.id}
+                className={`p-3.5 rounded-xl border text-xs font-mono transition-all flex flex-col md:flex-row md:items-start justify-between gap-3 ${
+                  item.error
+                    ? "bg-red-50/50 dark:bg-red-950/30 border-red-200 dark:border-red-900"
+                    : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/80"
+                }`}
+              >
+                <div className="flex items-start gap-3 min-w-0 flex-1">
+                  <span className="px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-900/80 text-purple-700 dark:text-purple-300 font-bold shrink-0">
+                    #{item.id}
+                  </span>
+                  <div className="space-y-1.5 min-w-0 flex-1">
+                    {item.error ? (
+                      <div className="text-red-600 dark:text-red-400 font-semibold flex items-center gap-1">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>Syntax Error: {item.error}</span>
+                      </div>
+                    ) : (
+                      <div className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                        <span>Valid JSON</span>
+                      </div>
+                    )}
+                    <pre className="p-2.5 bg-slate-100 dark:bg-slate-950 rounded-lg text-slate-800 dark:text-slate-200 overflow-x-auto text-[11px] leading-relaxed max-h-40">
+                      {item.formattedJson}
+                    </pre>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => handleCopy(item.formattedJson, item.id)}
+                  className="self-end md:self-start px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center gap-1 text-[11px] font-semibold shrink-0 cursor-pointer"
+                >
+                  {copiedIndex === item.id ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-500" />
+                      <span>Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Copy Item</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo } from "react";
 import { ToolDefinition } from "../types";
 import { getToolTheme, CATEGORY_THEMES } from "../utils/colorUtils";
 import {
@@ -19,8 +19,6 @@ import {
   ArrowRight,
   Search,
   Grid,
-  Command,
-  X,
   Sparkles,
 } from "lucide-react";
 
@@ -66,25 +64,6 @@ export const ToolsOverviewHome: React.FC<ToolsOverviewHomeProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showOnlyFavs, setShowOnlyFavs] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  // Global Keyboard listener for `/` or `Cmd+K` to focus search
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        document.activeElement?.tagName === "INPUT" ||
-        document.activeElement?.tagName === "TEXTAREA"
-      ) {
-        return;
-      }
-      if (e.key === "/" || ((e.metaKey || e.ctrlKey) && e.key === "k")) {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
 
   // Compute category counts
   const categoryCounts = useMemo(() => {
@@ -119,38 +98,10 @@ export const ToolsOverviewHome: React.FC<ToolsOverviewHomeProps> = ({
 
   return (
     <div className="space-y-6 animate-fade-in pb-12">
-      {/* Search & Filtering Control Panel */}
-      <div className="p-4 sm:p-5 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3.5">
-        {/* Search Input Box with Keyboard Shortcut Indicator */}
-        <div className="relative w-full">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 dark:text-slate-500 pointer-events-none" />
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search tools by name, description, or keyword (e.g. json, jwt, sql, uuid)..."
-            className="w-full pl-10 pr-24 py-2.5 bg-slate-100/70 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800/90 border border-slate-200 dark:border-slate-700/70 text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500 transition-all shadow-2xs"
-          />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-            {searchQuery ? (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-                title="Clear search"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            ) : (
-              <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono font-semibold text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-700/80 border border-slate-200 dark:border-slate-600/80 rounded-md shadow-2xs">
-                <Command className="w-2.5 h-2.5" /> /
-              </kbd>
-            )}
-          </div>
-        </div>
-
+      {/* Category Filtering & Favorites Control Panel */}
+      <div className="p-3.5 sm:p-4 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
         {/* Category Filter Pills & Favorites Toggle */}
-        <div className="flex items-center justify-between gap-3 pt-1">
+        <div className="flex items-center justify-between gap-3">
           {/* Category Track with Scroll Fade Mask */}
           <div className="relative flex-1 min-w-0 flex items-center">
             <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scrollbar-none py-0.5 pr-6 scroll-smooth">
