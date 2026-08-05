@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { generateUuidV4, generatePassword } from "../../utils/securityUtils";
 import { Key, Copy, Check, RefreshCw } from "lucide-react";
+import { InfoTooltip } from "../common/Tooltip";
 
 export const UuidPasswordTool: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"uuid" | "password">("uuid");
@@ -72,6 +73,16 @@ export const UuidPasswordTool: React.FC = () => {
           <h2 className="font-bold text-sm text-slate-900 dark:text-white">
             UUID v4 & Cryptographic Secret Generator
           </h2>
+          <InfoTooltip
+            text={
+              <div className="space-y-1">
+                <div className="font-bold text-indigo-300">RFC 4122 UUID v4</div>
+                <div className="text-[11px] leading-relaxed text-slate-200">
+                  UUID v4 is a 128-bit cryptographically secure pseudorandom identifier (36 chars with hyphens). The chance of collision is virtually zero ($2^{122}$ possibilities).
+                </div>
+              </div>
+            }
+          />
         </div>
 
         <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-medium">

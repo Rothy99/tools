@@ -3,6 +3,7 @@ import { parseCronExpression } from "../../utils/codeUtils";
 import { SAMPLE_PRESETS } from "../../data/samplePresets";
 import { useSessionStorageString } from "../../hooks/useSessionStorage";
 import { Clock, Calendar, Check, Copy } from "lucide-react";
+import { InfoTooltip } from "../common/Tooltip";
 
 export const CronTool: React.FC = () => {
   const [cronInput, setCronInput] = useSessionStorageString("devstudio_cron_input", SAMPLE_PRESETS.cronSample);
@@ -36,11 +37,29 @@ export const CronTool: React.FC = () => {
             <h2 className="font-bold text-sm text-slate-900 dark:text-white">
               Cron Schedule Expression Parser & Builder
             </h2>
+            <InfoTooltip
+              text={
+                <div className="space-y-1.5">
+                  <div className="font-bold text-indigo-300">Cron 5-Field Format:</div>
+                  <div className="font-mono text-[11px] text-amber-300">
+                    * * * * *<br />
+                    │ │ │ │ └── Day of Week (0-6) (Sun=0)<br />
+                    │ │ │ └──── Month (1-12)<br />
+                    │ │ └────── Day of Month (1-31)<br />
+                    │ └──────── Hour (0-23)<br />
+                    └────────── Minute (0-59)
+                  </div>
+                  <div className="text-[10px] text-slate-300 pt-1 border-t border-slate-700">
+                    <span className="text-amber-300">*</span> = Any value, <span className="text-amber-300">,</span> = Value list, <span className="text-amber-300">-</span> = Range, <span className="text-amber-300">/</span> = Step values
+                  </div>
+                </div>
+              }
+            />
           </div>
 
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+            className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copied ? "Copied" : "Copy Expression"}</span>

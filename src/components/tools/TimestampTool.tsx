@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSessionStorageString } from "../../hooks/useSessionStorage";
 import { Calendar, Clock, Copy, Check, RefreshCw } from "lucide-react";
+import { InfoTooltip } from "../common/Tooltip";
 
 export const TimestampTool: React.FC = () => {
   const [nowSec, setNowSec] = useState<number>(Math.floor(Date.now() / 1000));
@@ -43,8 +44,18 @@ export const TimestampTool: React.FC = () => {
       {/* Live Clock Header */}
       <div className="p-5 bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-2xl border border-indigo-800 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-300 block mb-1">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5 mb-1">
             Current Unix Epoch Time
+            <InfoTooltip
+              text={
+                <div className="space-y-1">
+                  <div className="font-bold text-indigo-300">What is Unix Epoch Time?</div>
+                  <div className="text-[11px] leading-relaxed text-slate-200">
+                    The number of seconds that have elapsed since 00:00:00 UTC on 1 January 1970 (excluding leap seconds).
+                  </div>
+                </div>
+              }
+            />
           </span>
           <div className="font-mono text-2xl font-extrabold flex items-center gap-3">
             <Clock className="w-6 h-6 text-indigo-400 animate-pulse" />
@@ -55,7 +66,7 @@ export const TimestampTool: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setTimestampInput(String(nowSec))}
-            className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-2xs"
+            className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-2xs cursor-pointer"
           >
             Use Current Time
           </button>
@@ -71,9 +82,22 @@ export const TimestampTool: React.FC = () => {
           </h3>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-              Unix Epoch Timestamp (Seconds or Milliseconds)
-            </label>
+            <div className="flex items-center gap-1.5 mb-1">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Unix Epoch Timestamp
+              </label>
+              <InfoTooltip
+                text={
+                  <div className="space-y-1">
+                    <div className="font-bold text-indigo-300">Auto Unit Detection</div>
+                    <div className="text-[11px] leading-relaxed text-slate-200 font-mono">
+                      10 digits = Seconds (e.g. 1785800000)<br />
+                      13 digits = Milliseconds (e.g. 1785800000000)
+                    </div>
+                  </div>
+                }
+              />
+            </div>
             <input
               type="text"
               value={timestampInput}

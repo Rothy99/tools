@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef } from "react";
 import { useSessionStorageString } from "../../hooks/useSessionStorage";
 import { JsonTreeNode } from "../../types";
+import { InfoTooltip } from "../common/Tooltip";
 import {
   formatJsonString,
   minifyJsonString,
@@ -325,6 +326,16 @@ export const JsonFormatterTool: React.FC = () => {
       <div className="sticky top-[57px] sm:top-[61px] z-20 p-2.5 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 overflow-x-auto whitespace-nowrap scrollbar-none rounded-t-2xl">
         {/* Left Group: View Tabs + Metrics + Status Badge */}
         <div className="flex items-center gap-2.5 shrink-0">
+          <InfoTooltip
+            text={
+              <div className="space-y-1">
+                <div className="font-bold text-indigo-300">JSON Studio Features</div>
+                <div className="text-[11px] leading-relaxed text-slate-200">
+                  Includes real-time syntax checking, auto-repairing bad quotes/trailing commas, interactive tree viewer, and 1-click export to YAML, XML, or CSV.
+                </div>
+              </div>
+            }
+          />
           <div className="flex items-center bg-slate-200/80 dark:bg-slate-900 p-1 rounded-xl gap-0.5 shrink-0">
             {[
               { id: "editor", label: "Editor", icon: <Edit3 className="w-3.5 h-3.5" /> },

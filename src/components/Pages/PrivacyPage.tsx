@@ -34,7 +34,7 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ onGoHome }) => {
         <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-200 text-xs leading-relaxed flex items-start gap-3">
           <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
           <div>
-            <strong>100% Client-Side Guarantee:</strong> DevStudio executes all string parsing, formatting, encoding, and hashing locally within your client browser session. No raw payload or API secret is ever transmitted to external servers.
+            <strong>100% Client-Side Guarantee:</strong> mytoolsbox executes all string parsing, formatting, encoding, and hashing locally within your client browser session. No raw payload or API secret is ever transmitted to external servers.
           </div>
         </div>
 
@@ -45,7 +45,7 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ onGoHome }) => {
               <span>1. Data Collection & Processing</span>
             </h2>
             <p>
-              When you use DevStudio utilities (JSON Formatter, JWT Decoder, Base64 Encoder, Hash Generator, Regex Tester, etc.), all computations are handled in-memory by your device's JavaScript engine. We do not maintain server-side databases for user inputs, nor do we store key-value data entered into tool inputs.
+              When you use mytoolsbox utilities (JSON Formatter, JWT Decoder, Base64 Encoder, Hash Generator, Regex Tester, etc.), all computations are handled in-memory by your device's JavaScript engine. We do not maintain server-side databases for user inputs, nor do we store key-value data entered into tool inputs.
             </p>
           </section>
 

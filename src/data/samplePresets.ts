@@ -1,6 +1,6 @@
 export const SAMPLE_PRESETS = {
   jsonFormatter: `{
-  "appName": "DevStudio Suite",
+  "appName": "mytoolsbox Suite",
   "version": "2.5.0",
   "active": true,
   "settings": {
@@ -75,7 +75,7 @@ export const SAMPLE_PRESETS = {
   jwtSample: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsZXggRGV2ZWxvcGVyIiwicm9sZSI6InNlbmlvcl9lbmdpbmVlciIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoyNTE2MjM5MDIyfQ.X4f3x7d8y9z0_signature_placeholder_abc123`,
 
   regexSamplePattern: `\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b`,
-  regexSampleText: `Contact our support team at support@devstudio.io or sales@company.com!
+  regexSampleText: `Contact our support team at support@mytoolsbox.io or sales@company.com!
 Invalid addresses like test@com or @no-user.org will not match.
 Reach out to john.doe.2026@sub.domain.co.uk today.`,
 
@@ -83,9 +83,9 @@ Reach out to john.doe.2026@sub.domain.co.uk today.`,
 
   cronSample: `*/15 9-17 * * 1-5`,
 
-  urlSample: `https://devstudio.io/search?q=developer+tools&category=json&mode=super&limit=20&filter%5Bactive%5D=true&tags=formatter%2Cdiff%2Cjwt#results`,
+  urlSample: `https://mytoolsbox.io/search?q=developer+tools&category=json&mode=super&limit=20&filter%5Bactive%5D=true&tags=formatter%2Cdiff%2Cjwt#results`,
 
-  base64Sample: `Hello DevStudio! 🚀
+  base64Sample: `Hello mytoolsbox! 🚀
 Welcome to the Super Web Tool suite for JSON formatting, JSON diff, JWT decoding, Hash calculation, and more!`,
 
   colorSample: `#6366f1`,

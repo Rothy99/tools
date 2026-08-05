@@ -11,7 +11,7 @@ interface FeedbackModalProps {
 export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   isOpen,
   onClose,
-  toolName = "DevStudio",
+  toolName = "mytoolsbox",
   toolId = "general",
 }) => {
   const [feedbackType, setFeedbackType] = useState<"bug" | "feature" | "improvement">("bug");
@@ -100,7 +100,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 Thank You for Your Feedback!
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
-                Your feedback for <strong>{toolName}</strong> has been logged. We continuously use user reports to enhance DevStudio tools.
+                Your feedback for <strong>{toolName}</strong> has been logged. We continuously use user reports to enhance mytoolsbox tools.
               </p>
             </div>
             <button

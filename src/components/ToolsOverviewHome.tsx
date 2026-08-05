@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { ToolDefinition } from "../types";
 import { getToolTheme, CATEGORY_THEMES } from "../utils/colorUtils";
 import {
@@ -19,6 +19,9 @@ import {
   ArrowRight,
   Search,
   Grid,
+  Command,
+  X,
+  Sparkles,
 } from "lucide-react";
 
 interface ToolsOverviewHomeProps {
@@ -29,19 +32,19 @@ interface ToolsOverviewHomeProps {
 }
 
 const ICON_MAP: Record<string, React.ReactNode> = {
-  FileCode: <FileCode className="w-6 h-6" />,
-  GitCompare: <GitCompare className="w-6 h-6" />,
-  FileDiff: <FileDiff className="w-6 h-6" />,
-  Binary: <Binary className="w-6 h-6" />,
-  KeyRound: <KeyRound className="w-6 h-6" />,
-  Regex: <Regex className="w-6 h-6" />,
-  Link: <Link className="w-6 h-6" />,
-  ShieldCheck: <ShieldCheck className="w-6 h-6" />,
-  Key: <Key className="w-6 h-6" />,
-  Palette: <Palette className="w-6 h-6" />,
-  Clock: <Clock className="w-6 h-6" />,
-  Database: <Database className="w-6 h-6" />,
-  Calendar: <Calendar className="w-6 h-6" />,
+  FileCode: <FileCode className="w-11 h-11" />,
+  GitCompare: <GitCompare className="w-11 h-11" />,
+  FileDiff: <FileDiff className="w-11 h-11" />,
+  Binary: <Binary className="w-11 h-11" />,
+  KeyRound: <KeyRound className="w-11 h-11" />,
+  Regex: <Regex className="w-11 h-11" />,
+  Link: <Link className="w-11 h-11" />,
+  ShieldCheck: <ShieldCheck className="w-11 h-11" />,
+  Key: <Key className="w-11 h-11" />,
+  Palette: <Palette className="w-11 h-11" />,
+  Clock: <Clock className="w-11 h-11" />,
+  Database: <Database className="w-11 h-11" />,
+  Calendar: <Calendar className="w-11 h-11" />,
 };
 
 const CATEGORIES = [
@@ -63,8 +66,36 @@ export const ToolsOverviewHome: React.FC<ToolsOverviewHomeProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showOnlyFavs, setShowOnlyFavs] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Filter tools based on search and category
+  // Global Keyboard listener for `/` or `Cmd+K` to focus search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA"
+      ) {
+        return;
+      }
+      if (e.key === "/" || ((e.metaKey || e.ctrlKey) && e.key === "k")) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Compute category counts
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: tools.length };
+    tools.forEach((t) => {
+      counts[t.category] = (counts[t.category] || 0) + 1;
+    });
+    return counts;
+  }, [tools]);
+
+  // Filter tools based on search, category, and favorites
   const filteredTools = useMemo(() => {
     return tools.filter((tool) => {
       const matchesSearch =
@@ -86,112 +117,124 @@ export const ToolsOverviewHome: React.FC<ToolsOverviewHomeProps> = ({
     return tools.filter((t) => favorites.includes(t.id));
   }, [tools, favorites]);
 
-  const popularTools = useMemo(() => {
-    return tools.filter((t) => t.isPopular);
-  }, [tools]);
-
   return (
     <div className="space-y-6 animate-fade-in pb-12">
-      {/* Clean Top Search Bar */}
-      <div className="p-4 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-2xs space-y-4">
+      {/* Search & Filtering Control Panel */}
+      <div className="p-4 sm:p-5 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3.5">
+        {/* Search Input Box with Keyboard Shortcut Indicator */}
         <div className="relative w-full">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 dark:text-slate-500 pointer-events-none" />
           <input
+            ref={searchInputRef}
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search tools by name, description, or keyword..."
-            className="w-full pl-10 pr-10 py-2.5 bg-slate-50/80 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all"
+            placeholder="Search tools by name, description, or keyword (e.g. json, jwt, sql, uuid)..."
+            className="w-full pl-10 pr-24 py-2.5 bg-slate-100/70 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800/90 border border-slate-200 dark:border-slate-700/70 text-sm font-medium text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500 transition-all shadow-2xs"
           />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-            >
-              Clear
-            </button>
-          )}
-        </div>
-
-        {/* 👉 INJECT ADSENSE SLOT HERE (Between Search and Category Pills) */}
-        <div
-          id="adsense-upper-leaderboard"
-          className="w-full min-h-[90px] rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 flex flex-col items-center justify-center p-3 text-center text-slate-400 dark:text-slate-500 text-xs font-mono transition-all relative overflow-hidden"
-          title="Google AdSense Auto-Ads Leaderboard Reserved Slot (min-height: 90px)"
-        >
-          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-1">
-            <span className="text-[10px] px-2 py-0.5 font-bold uppercase tracking-wider rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shrink-0">
-              AdSense Auto-Ads Placement
-            </span>
-            <span className="text-[10px] sm:text-[11px] text-slate-400">Leaderboard Slot (728x90 / Responsive)</span>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+            {searchQuery ? (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                title="Clear search"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            ) : (
+              <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono font-semibold text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-700/80 border border-slate-200 dark:border-slate-600/80 rounded-md shadow-2xs">
+                <Command className="w-2.5 h-2.5" /> /
+              </kbd>
+            )}
           </div>
-          <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 max-w-lg leading-tight">
-            Reserved 90px container to prevent layout shifts when Google Auto-Ads loads leaderboard banners.
-          </p>
         </div>
 
         {/* Category Filter Pills & Favorites Toggle */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-            {CATEGORIES.map((cat) => {
-              const isSelected = selectedCategory === cat.id && !showOnlyFavs;
-              const catTheme = cat.id !== "all" ? CATEGORY_THEMES[cat.id as keyof typeof CATEGORY_THEMES] : null;
+        <div className="flex items-center justify-between gap-3 pt-1">
+          {/* Category Track with Scroll Fade Mask */}
+          <div className="relative flex-1 min-w-0 flex items-center">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scrollbar-none py-0.5 pr-6 scroll-smooth">
+              {CATEGORIES.map((cat) => {
+                const isSelected = selectedCategory === cat.id && !showOnlyFavs;
+                const catTheme = cat.id !== "all" ? CATEGORY_THEMES[cat.id as keyof typeof CATEGORY_THEMES] : null;
+                const count = categoryCounts[cat.id] || 0;
 
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => {
-                    setSelectedCategory(cat.id);
-                    setShowOnlyFavs(false);
-                  }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                    isSelected
-                      ? catTheme
-                        ? `${catTheme.pillActive}`
-                        : "bg-indigo-600 text-white shadow-xs"
-                      : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-                  }`}
-                >
-                  {catTheme && (
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => {
+                      setSelectedCategory(cat.id);
+                      setShowOnlyFavs(false);
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                      isSelected
+                        ? catTheme
+                          ? `${catTheme.pillActive} shadow-xs`
+                          : "bg-indigo-600 text-white shadow-xs"
+                        : "bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    {catTheme && (
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          isSelected ? "bg-white" : catTheme.dotColor
+                        }`}
+                      />
+                    )}
+                    <span>{cat.name}</span>
                     <span
-                      className={`w-2 h-2 rounded-full ${
-                        isSelected ? "bg-white" : catTheme.dotColor
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                        isSelected
+                          ? "bg-white/20 text-white"
+                          : "bg-slate-200/80 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
                       }`}
-                    />
-                  )}
-                  <span>{cat.name}</span>
-                </button>
-              );
-            })}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Gradient Overlay for Edge Scroll Smoothness */}
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/90 dark:from-slate-900/80 to-transparent pointer-events-none" />
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Divider */}
+          <div className="h-5 w-px bg-slate-200/80 dark:bg-slate-800 shrink-0 hidden sm:block" />
+
+          {/* Favorites Filter Button */}
+          <div className="shrink-0">
             <button
               onClick={() => setShowOnlyFavs(!showOnlyFavs)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-2xs ${
                 showOnlyFavs
                   ? "bg-amber-500/10 border-amber-500/40 text-amber-600 dark:text-amber-400"
-                  : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100"
+                  : "bg-slate-100/80 dark:bg-slate-800/80 border-slate-200/80 dark:border-slate-700/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700"
               }`}
-              title="Favorites are saved locally in your browser cache"
+              title="Filter by favorited tools"
             >
               <Star className={`w-3.5 h-3.5 ${showOnlyFavs ? "fill-amber-400 text-amber-400" : ""}`} />
-              <span>Favorites ({favorites.length})</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-200/60 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-normal">
-                Cached
+              <span className="hidden xs:inline">Favorites</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                showOnlyFavs
+                  ? "bg-amber-500/20 text-amber-600 dark:text-amber-300"
+                  : "bg-slate-200/80 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+              }`}>
+                {favorites.length}
               </span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Favorites Showcase Section (If favorites exist and not searching) */}
+      {/* Favorites Showcase Section (If favorites exist and no active query) */}
       {!searchQuery && selectedCategory === "all" && !showOnlyFavs && favoriteTools.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
               <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-              <span>Your Favorite Shortcuts ({favoriteTools.length})</span>
+              <span>Your Bookmarked Shortcuts ({favoriteTools.length})</span>
             </h2>
           </div>
 
@@ -212,7 +255,7 @@ export const ToolsOverviewHome: React.FC<ToolsOverviewHomeProps> = ({
       {/* Main Tools Grid */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
             <Grid className="w-4 h-4 text-indigo-500" />
             <span>
               {showOnlyFavs
@@ -244,73 +287,24 @@ export const ToolsOverviewHome: React.FC<ToolsOverviewHomeProps> = ({
                 setSelectedCategory("all");
                 setShowOnlyFavs(false);
               }}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition-colors cursor-pointer"
             >
               Reset Filters
             </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTools.flatMap((tool, index) => {
-              const elements = [
-                <ToolCard
-                  key={tool.id}
-                  tool={tool}
-                  isFav={favorites.includes(tool.id)}
-                  onSelectTool={onSelectTool}
-                  onToggleFavorite={onToggleFavorite}
-                />,
-              ];
-
-              // 👉 INJECT NATIVE IN-FEED AD as Card 3 (index 1 -> inserted before index 2)
-              if (index === 1 && filteredTools.length >= 2) {
-                elements.push(<NativeInFeedAdCard key="native-ad-card-slot" />);
-              }
-
-              return elements;
-            })}
+            {filteredTools.map((tool) => (
+              <ToolCard
+                key={tool.id}
+                tool={tool}
+                isFav={favorites.includes(tool.id)}
+                onSelectTool={onSelectTool}
+                onToggleFavorite={onToggleFavorite}
+              />
+            ))}
           </div>
         )}
-      </div>
-    </div>
-  );
-};
-
-/* Subcomponent: Native In-Feed Ad Card Slot */
-const NativeInFeedAdCard: React.FC = () => {
-  return (
-    <div
-      id="adsense-native-in-feed-card"
-      className="group relative flex flex-col justify-between p-5 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md border border-dashed border-indigo-200/80 dark:border-indigo-900/60 rounded-2xl min-h-[200px] shadow-2xs"
-    >
-      <div>
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold text-xs uppercase tracking-wider">
-            Ad
-          </div>
-          <span className="text-[10px] px-2 py-0.5 font-bold uppercase tracking-wider rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700">
-            Sponsored
-          </span>
-        </div>
-
-        <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200 tracking-tight flex items-center gap-1.5">
-          <span>AdSense Native In-Feed Unit</span>
-        </h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-          Matches grid card widths and alignments perfectly. Google AdSense automatically populates this slot.
-        </p>
-
-        <div className="mt-3 space-y-1.5">
-          <div className="h-2.5 bg-slate-200/60 dark:bg-slate-800 rounded-md w-4/5 animate-pulse" />
-          <div className="h-2.5 bg-slate-200/40 dark:bg-slate-800/60 rounded-md w-3/5 animate-pulse" />
-        </div>
-      </div>
-
-      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-400 dark:text-slate-500">
-        <span>Google Native Ad Container</span>
-        <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-indigo-500 font-semibold">
-          In-Feed Ready
-        </span>
       </div>
     </div>
   );
@@ -335,13 +329,13 @@ const ToolCard: React.FC<ToolCardProps> = ({
   return (
     <div
       onClick={() => onSelectTool(tool.id)}
-      className={`group relative flex flex-col justify-between p-5 bg-white/70 dark:bg-slate-900/60 hover:bg-white/85 dark:hover:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 ${theme.cardBorderHover} rounded-2xl cursor-pointer transition-all duration-200 shadow-xs hover:shadow-lg ${theme.cardShadowHover}`}
+      className={`group relative flex flex-col justify-between p-5 bg-white/80 dark:bg-slate-900/70 hover:bg-white dark:hover:bg-slate-900 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 ${theme.cardBorderHover} rounded-2xl cursor-pointer transition-all duration-200 shadow-2xs hover:shadow-lg ${theme.cardShadowHover}`}
     >
       <div>
         {/* Card Header: Icon + Category Badge + Favorite Star */}
         <div className="flex items-start justify-between gap-3 mb-3">
-          <div className={`p-2.5 rounded-xl ${theme.iconBg} transition-colors border border-slate-200/50 dark:border-slate-800 shadow-2xs`}>
-            {ICON_MAP[tool.icon] || <FileCode className="w-6 h-6" />}
+          <div className={`p-3.5 rounded-2xl ${theme.iconBg} transition-colors border border-slate-200/50 dark:border-slate-800 shadow-2xs`}>
+            {ICON_MAP[tool.icon] || <FileCode className="w-11 h-11" />}
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -357,7 +351,7 @@ const ToolCard: React.FC<ToolCardProps> = ({
             <button
               type="button"
               onClick={(e) => onToggleFavorite(tool.id, e)}
-              className={`p-1.5 rounded-lg border transition-all ${
+              className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
                 isFav
                   ? "bg-amber-50 dark:bg-amber-950/80 text-amber-500 border-amber-200 dark:border-amber-800"
                   : "bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600 border-slate-200 dark:border-slate-700 hover:text-amber-400"
@@ -392,9 +386,12 @@ const ToolCard: React.FC<ToolCardProps> = ({
 
       {/* Card Footer: Launch Tool CTA */}
       <div className={`mt-5 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs font-semibold ${theme.textAccent} group-hover:translate-x-0.5 transition-transform`}>
-        <span>Open Tool</span>
+        <span className="flex items-center gap-1">
+          <Sparkles className="w-3 h-3 text-indigo-400" /> Open Tool
+        </span>
         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
       </div>
     </div>
   );
 };
+

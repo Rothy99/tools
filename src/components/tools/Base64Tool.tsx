@@ -3,6 +3,7 @@ import { encodeBase64, decodeBase64 } from "../../utils/encodingUtils";
 import { SAMPLE_PRESETS } from "../../data/samplePresets";
 import { Binary, Copy, Check, Upload, Image as ImageIcon, Download, Wand2 } from "lucide-react";
 import { useSessionStorageString } from "../../hooks/useSessionStorage";
+import { InfoTooltip } from "../common/Tooltip";
 
 export const Base64Tool: React.FC = () => {
   const [mode, setMode] = useState<"text" | "image">("text");
@@ -106,11 +107,26 @@ export const Base64Tool: React.FC = () => {
       {/* Modes & Directions Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
         <div className="flex items-center gap-2">
+          <Binary className="w-5 h-5 text-indigo-500" />
+          <h2 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+            Base64 Encoder & Decoder
+            <InfoTooltip
+              text={
+                <div className="space-y-1">
+                  <div className="font-bold text-indigo-300">Base64 Encoding</div>
+                  <div className="text-[11px] leading-relaxed text-slate-200">
+                    Converts binary or UTF-8 text into an ASCII string format using 64 safe characters. Increases size by ~33%. Useful for data URIs and API payloads.
+                  </div>
+                </div>
+              }
+            />
+          </h2>
+
           {/* Mode Switch */}
-          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-medium">
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-medium ml-2">
             <button
               onClick={() => setMode("text")}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                 mode === "text"
                   ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs"
                   : "text-slate-600 dark:text-slate-400"
@@ -120,7 +136,7 @@ export const Base64Tool: React.FC = () => {
             </button>
             <button
               onClick={() => setMode("image")}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                 mode === "image"
                   ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs"
                   : "text-slate-600 dark:text-slate-400"

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { md5, computeSubtleHash } from "../../utils/securityUtils";
 import { useSessionStorageString } from "../../hooks/useSessionStorage";
 import { ShieldCheck, Copy, Check, CheckCircle2, XCircle } from "lucide-react";
+import { InfoTooltip } from "../common/Tooltip";
 
 export const HashTool: React.FC = () => {
   const [input, setInput] = useSessionStorageString("devstudio_hash_input", "DevStudio Super Tools 2026");
@@ -48,6 +49,17 @@ export const HashTool: React.FC = () => {
             <h2 className="font-bold text-sm text-slate-900 dark:text-white">
               Cryptographic Hash & Checksum Generator
             </h2>
+            <InfoTooltip
+              text={
+                <div className="space-y-1">
+                  <div className="font-bold text-indigo-300">Hash Algorithm Security Note</div>
+                  <div className="text-[11px] leading-relaxed text-slate-200">
+                    <span className="text-amber-300 font-bold">SHA-256</span> & <span className="text-amber-300 font-bold">SHA-512</span> are modern secure standard cryptographic hashing functions.<br />
+                    <span className="text-rose-300">MD5</span> & <span className="text-rose-300">SHA-1</span> are legacy algorithms suitable for legacy checksum verifications.
+                  </div>
+                </div>
+              }
+            />
           </div>
         </div>
 

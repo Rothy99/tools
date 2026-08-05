@@ -3,6 +3,14 @@ import { testRegex } from "../../utils/codeUtils";
 import { SAMPLE_PRESETS } from "../../data/samplePresets";
 import { useSessionStorageString } from "../../hooks/useSessionStorage";
 import { Regex, Check, Copy, AlertCircle } from "lucide-react";
+import { InfoTooltip, Tooltip } from "../common/Tooltip";
+
+const FLAG_DESCRIPTIONS: Record<string, { title: string; desc: string }> = {
+  g: { title: "Global (g)", desc: "Find all matches rather than stopping after the first match." },
+  i: { title: "Case Insensitive (i)", desc: "Ignore uppercase/lowercase differences during matching." },
+  m: { title: "Multiline (m)", desc: "Treat ^ and $ as beginning/end of each line rather than the whole string." },
+  s: { title: "DotAll (s)", desc: "Allows dot (.) to match newline characters as well." },
+};
 
 export const RegexTool: React.FC = () => {
   const [pattern, setPattern] = useSessionStorageString("devstudio_regex_pattern", SAMPLE_PRESETS.regexSamplePattern);
@@ -48,12 +56,27 @@ export const RegexTool: React.FC = () => {
             <h2 className="font-bold text-sm text-slate-900 dark:text-white">
               Regex Pattern Tester
             </h2>
+            <InfoTooltip
+              text={
+                <div className="space-y-1">
+                  <div className="font-bold text-indigo-300">Regex Quick Syntax Reference</div>
+                  <div className="text-[11px] space-y-0.5 font-mono">
+                    <div><span className="text-amber-300">\d</span> : Any digit (0-9)</div>
+                    <div><span className="text-amber-300">\w</span> : Word character (A-Z, a-z, 0-9, _)</div>
+                    <div><span className="text-amber-300">\s</span> : Whitespace character</div>
+                    <div><span className="text-amber-300">[a-z]</span> : Character range</div>
+                    <div><span className="text-amber-300">+</span> / <span className="text-amber-300">*</span> / <span className="text-amber-300">?</span> : 1+, 0+, or optional</div>
+                    <div><span className="text-amber-300">(...)</span> : Capturing group</div>
+                  </div>
+                </div>
+              }
+            />
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopyPattern}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+              className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copied ? "Copied" : "Copy Pattern"}</span>
@@ -64,31 +87,44 @@ export const RegexTool: React.FC = () => {
         {/* Expression Input Bar */}
         <div className="flex items-center gap-2">
           <span className="font-mono text-sm font-bold text-slate-400">/</span>
-          <input
-            type="text"
-            value={pattern}
-            onChange={(e) => setPattern(e.target.value)}
-            placeholder="Type regex pattern (e.g. \b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b)..."
-            className="flex-1 px-3 py-2 font-mono text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-          />
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={pattern}
+              onChange={(e) => setPattern(e.target.value)}
+              placeholder="Type regex pattern (e.g. \b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b)..."
+              className="w-full px-3 py-2 font-mono text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
           <span className="font-mono text-sm font-bold text-slate-400">/{flagString}</span>
 
           {/* Flag Switches */}
           <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
-            {(["g", "i", "m", "s"] as const).map((flag) => (
-              <button
-                key={flag}
-                onClick={() => toggleFlag(flag)}
-                className={`px-2.5 py-1 text-xs font-mono font-bold rounded-lg transition-all ${
-                  flags[flag]
-                    ? "bg-indigo-600 text-white shadow-xs"
-                    : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
-                }`}
-                title={`Toggle flag: ${flag}`}
-              >
-                {flag}
-              </button>
-            ))}
+            {(["g", "i", "m", "s"] as const).map((flag) => {
+              const info = FLAG_DESCRIPTIONS[flag];
+              return (
+                <Tooltip
+                  key={flag}
+                  content={
+                    <div>
+                      <div className="font-bold text-indigo-300">{info.title}</div>
+                      <div className="text-[11px] text-slate-300">{info.desc}</div>
+                    </div>
+                  }
+                >
+                  <button
+                    onClick={() => toggleFlag(flag)}
+                    className={`px-2.5 py-1 text-xs font-mono font-bold rounded-lg transition-all cursor-pointer ${
+                      flags[flag]
+                        ? "bg-indigo-600 text-white shadow-xs"
+                        : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                    }`}
+                  >
+                    {flag}
+                  </button>
+                </Tooltip>
+              );
+            })}
           </div>
         </div>
 

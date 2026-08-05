@@ -7,38 +7,38 @@ interface MetaHeadProps {
 
 export const MetaHead: React.FC<MetaHeadProps> = ({ activeRoute }) => {
   useEffect(() => {
-    let title = "DevStudio - Free Client-Side Developer Tools & Utilities";
+    let title = "mytoolsbox - Free Client-Side Developer Tools & Utilities";
     let description =
-      "DevStudio is a high-performance suite of free, 100% client-side developer tools including JSON Formatter, JWT Decoder, Base64 Converter, Regex Tester, SQL Formatter, and more.";
+      "mytoolsbox is a high-performance suite of free, 100% client-side developer tools including JSON Formatter, JWT Decoder, Base64 Converter, Regex Tester, SQL Formatter, and more.";
     let keywords =
       "developer tools, json formatter, jwt decoder, base64 encoder, regex tester, sql formatter, cron parser, client-side, offline tools";
     let routePath = "/";
 
     if (activeRoute === "privacy") {
-      title = "Privacy Policy - DevStudio Developer Utilities";
+      title = "Privacy Policy - mytoolsbox Developer Utilities";
       description =
-        "DevStudio Privacy Policy. 100% client-side tool execution ensuring zero data transmission or payload logging.";
-      keywords = "privacy policy, devstudio privacy, data privacy, client-side security";
+        "mytoolsbox Privacy Policy. 100% client-side tool execution ensuring zero data transmission or payload logging.";
+      keywords = "privacy policy, mytoolsbox privacy, data privacy, client-side security";
       routePath = "/privacy";
     } else if (activeRoute === "terms") {
-      title = "Terms of Service - DevStudio Developer Utilities";
+      title = "Terms of Service - mytoolsbox Developer Utilities";
       description =
-        "DevStudio Terms of Service. Terms and conditions for using our free online developer tools and utilities.";
-      keywords = "terms of service, devstudio terms, usage rules";
+        "mytoolsbox Terms of Service. Terms and conditions for using our free online developer tools and utilities.";
+      keywords = "terms of service, mytoolsbox terms, usage rules";
       routePath = "/terms";
     } else if (activeRoute === "contact") {
-      title = "Contact Us & Feedback - DevStudio Developer Utilities";
+      title = "Contact Us & Feedback - mytoolsbox Developer Utilities";
       description =
-        "Contact the DevStudio engineering team for tool requests, feedback, or bug reports.";
-      keywords = "contact devstudio, support, feature request, bug report";
+        "Contact the mytoolsbox engineering team for tool requests, feedback, or bug reports.";
+      keywords = "contact mytoolsbox, support, feature request, bug report";
       routePath = "/contact";
     } else if (activeRoute !== "home") {
       const tool = TOOLS.find((t) => t.id === activeRoute);
       if (tool) {
-        title = tool.pageTitle || `${tool.name} | Free Online Developer Tool - DevStudio`;
+        title = tool.pageTitle || `${tool.name} | Free Online Developer Tool - mytoolsbox`;
         description = tool.metaDescription || `${tool.description} Fast, 100% client-side, free developer utility with zero server logging.`;
         if (tool.keywords && tool.keywords.length > 0) {
-          keywords = `${tool.keywords.join(", ")}, devstudio, online tool`;
+          keywords = `${tool.keywords.join(", ")}, mytoolsbox, online tool`;
         }
         routePath = `/tools/${tool.id}`;
       }
@@ -82,7 +82,7 @@ export const MetaHead: React.FC<MetaHeadProps> = ({ activeRoute }) => {
     updateMetaTag("property", "og:description", description);
     updateMetaTag("property", "og:url", fullCanonicalUrl);
     updateMetaTag("property", "og:type", "website");
-    updateMetaTag("property", "og:site_name", "DevStudio");
+    updateMetaTag("property", "og:site_name", "mytoolsbox");
 
     // 4. Twitter Card Meta Tags
     updateMetaTag("name", "twitter:card", "summary_large_image");
@@ -93,7 +93,7 @@ export const MetaHead: React.FC<MetaHeadProps> = ({ activeRoute }) => {
     updateLinkTag("canonical", fullCanonicalUrl);
 
     // 6. JSON-LD Structured Data Schema for Google Crawlers
-    const schemaId = "devstudio-jsonld-schema";
+    const schemaId = "mytoolsbox-jsonld-schema";
     let schemaScript = document.getElementById(schemaId) as HTMLScriptElement | null;
     if (!schemaScript) {
       schemaScript = document.createElement("script");
@@ -129,7 +129,7 @@ export const MetaHead: React.FC<MetaHeadProps> = ({ activeRoute }) => {
       schemaScript.textContent = JSON.stringify({
         "@context": "https://schema.org",
         "@type": "WebSite",
-        name: "DevStudio",
+        name: "mytoolsbox",
         url: currentOrigin,
         description: "High-performance client-side developer tools and utilities.",
       });

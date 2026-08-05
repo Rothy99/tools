@@ -1,5 +1,5 @@
 import React from "react";
-import { Terminal, Shield, FileText, Mail, Heart, ExternalLink, Code2 } from "lucide-react";
+import { Boxes, Shield, FileText, Mail, Heart, ExternalLink, Code2 } from "lucide-react";
 
 interface FooterProps {
   onNavigate: (route: string) => void;
@@ -17,16 +17,16 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               onClick={() => onNavigate("home")}
               className="flex items-center gap-2 cursor-pointer group w-fit"
             >
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-sky-400 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-                <Terminal className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-sky-400 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform border border-indigo-400/30">
+                <Boxes className="w-4 h-4" />
               </div>
               <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white">
-                DevStudio<span className="text-indigo-500">.</span>
+                mytoolsbox<span className="text-indigo-500">.</span>
               </span>
             </div>
 
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              DevStudio provides 100% free, client-side, privacy-focused developer tools. No code or payloads leave your browser window.
+              mytoolsbox provides 100% free, client-side, privacy-focused developer tools. No code or payloads leave your browser window.
             </p>
 
             <div className="flex items-center gap-2 pt-1">
@@ -120,7 +120,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         {/* Bottom Bar: Copyright & Attribution */}
         <div className="pt-6 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
           <div>
-            © {new Date().getFullYear()} DevStudio. All rights reserved.
+            © {new Date().getFullYear()} mytoolsbox. All rights reserved.
           </div>
 
           <div className="flex items-center gap-4">

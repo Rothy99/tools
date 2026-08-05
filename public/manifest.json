@@ -1,0 +1,9 @@
+{
+  "short_name": "mytoolsbox",
+  "name": "mytoolsbox - Free Client-Side Developer Utilities & Studio",
+  "description": "Comprehensive developer toolkit with JSON formatter, JSON comparator, diff tools, encoder/decoders, regex tester, JWT debugger, and more.",
+  "start_url": "/",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "display": "standalone"
+}

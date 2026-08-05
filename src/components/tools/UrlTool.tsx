@@ -3,6 +3,7 @@ import { parseUrlQueryParams } from "../../utils/encodingUtils";
 import { SAMPLE_PRESETS } from "../../data/samplePresets";
 import { useSessionStorageString } from "../../hooks/useSessionStorage";
 import { Link, Copy, Check, Table, Globe } from "lucide-react";
+import { InfoTooltip } from "../common/Tooltip";
 
 export const UrlTool: React.FC = () => {
   const [urlInput, setUrlInput] = useSessionStorageString("devstudio_url_input", SAMPLE_PRESETS.urlSample);
@@ -43,6 +44,16 @@ export const UrlTool: React.FC = () => {
           <h2 className="font-bold text-sm text-slate-900 dark:text-white">
             URL Encoder / Decoder & Query Parameter Table
           </h2>
+          <InfoTooltip
+            text={
+              <div className="space-y-1">
+                <div className="font-bold text-indigo-300">URL Percent-Encoding Guide</div>
+                <div className="text-[11px] leading-relaxed text-slate-200">
+                  Escapes unsafe ASCII characters into percent-encoded triplets (<span className="text-amber-300">%20</span> for space, <span className="text-amber-300">%26</span> for &amp;). Parses query parameters automatically into key-value pairs.
+                </div>
+              </div>
+            }
+          />
         </div>
 
         <button

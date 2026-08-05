@@ -3,6 +3,7 @@ import { parseJwtToken } from "../../utils/encodingUtils";
 import { SAMPLE_PRESETS } from "../../data/samplePresets";
 import { useSessionStorageString } from "../../hooks/useSessionStorage";
 import { KeyRound, ShieldAlert, ShieldCheck, Clock, Copy, Check } from "lucide-react";
+import { InfoTooltip } from "../common/Tooltip";
 
 export const JwtTool: React.FC = () => {
   const [tokenInput, setTokenInput] = useSessionStorageString("devstudio_jwt_token_input", SAMPLE_PRESETS.jwtSample);
@@ -29,19 +30,32 @@ export const JwtTool: React.FC = () => {
           <h2 className="font-bold text-sm text-slate-900 dark:text-white">
             JWT Token Inspector & Debugger
           </h2>
+          <InfoTooltip
+            text={
+              <div className="space-y-1">
+                <div className="font-bold text-indigo-300">JWT Structure Overview</div>
+                <div className="text-[11px] leading-relaxed text-slate-200">
+                  A JSON Web Token consists of three parts separated by dots (<span className="text-amber-300">.</span>):
+                </div>
+                <div className="font-mono text-[10px] space-y-0.5">
+                  <span className="text-red-400">Header</span>.<span className="text-purple-400">Payload</span>.<span className="text-sky-400">Signature</span>
+                </div>
+              </div>
+            }
+          />
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={() => setTokenInput(SAMPLE_PRESETS.jwtSample)}
-            className="px-3 py-1.5 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+            className="px-3 py-1.5 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer"
           >
             Load Sample Token
           </button>
           <button
             onClick={handleCopyPayload}
             disabled={!parsedJwt.isValid}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50 cursor-pointer"
           >
             {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copied ? "Copied" : "Copy Payload"}</span>
@@ -134,7 +148,24 @@ export const JwtTool: React.FC = () => {
           {/* Payload Panel */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs">
             <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-purple-600 dark:text-purple-400 flex justify-between items-center">
-              <span>Payload Claims (Data)</span>
+              <div className="flex items-center gap-1.5">
+                <span>Payload Claims (Data)</span>
+                <InfoTooltip
+                  text={
+                    <div className="space-y-1">
+                      <div className="font-bold text-indigo-300">Standard Reserved Claims</div>
+                      <div className="text-[11px] space-y-0.5 font-mono">
+                        <div><span className="text-amber-300">iss</span> : Issuer domain</div>
+                        <div><span className="text-amber-300">sub</span> : Subject / User ID</div>
+                        <div><span className="text-amber-300">aud</span> : Audience recipient</div>
+                        <div><span className="text-amber-300">exp</span> : Expiration timestamp</div>
+                        <div><span className="text-amber-300">iat</span> : Issued-at timestamp</div>
+                        <div><span className="text-amber-300">nbf</span> : Not before timestamp</div>
+                      </div>
+                    </div>
+                  }
+                />
+              </div>
               {parsedJwt.payload && (
                 <button
                   onClick={handleCopyPayload}

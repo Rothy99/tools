@@ -34,7 +34,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onGoHome }) => {
         <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-800 dark:text-indigo-200 text-xs leading-relaxed flex items-start gap-3">
           <CheckCircle2 className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5" />
           <div>
-            <strong>Terms Overview:</strong> By accessing and using DevStudio, you agree to comply with these Terms of Service. All developer tools are provided for lawful formatting, parsing, conversion, and validation tasks.
+            <strong>Terms Overview:</strong> By accessing and using mytoolsbox, you agree to comply with these Terms of Service. All developer tools are provided for lawful formatting, parsing, conversion, and validation tasks.
           </div>
         </div>
 
@@ -45,7 +45,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onGoHome }) => {
               <span>1. Acceptance of Terms</span>
             </h2>
             <p>
-              By accessing DevStudio, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by these terms, please do not use this website.
+              By accessing mytoolsbox, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by these terms, please do not use this website.
             </p>
           </section>
 
@@ -54,7 +54,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onGoHome }) => {
               2. Permitted Use & Code Integrity
             </h2>
             <p>
-              DevStudio provides developer utilities free of charge for personal, commercial, and educational development workflows. You agree not to:
+              mytoolsbox provides developer utilities free of charge for personal, commercial, and educational development workflows. You agree not to:
             </p>
             <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-400">
               <li>Use the tools for illegal network interference or malicious password cracking.</li>

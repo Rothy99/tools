@@ -34,7 +34,7 @@ Our JSON Formatter & Beautifier processes your JSON string locally in real-time.
     ],
     faq: [
       {
-        question: "Is my JSON data safe when formatted in DevStudio?",
+        question: "Is my JSON data safe when formatted in mytoolsbox?",
         answer: "Yes, 100%. All formatting and parsing operations run strictly within your web browser JavaScript runtime. No text or payload is ever transmitted over the internet."
       },
       {

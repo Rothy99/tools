@@ -54,7 +54,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onGoHome }) => {
               Message Received!
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-300 max-w-md mx-auto leading-relaxed">
-              Thank you for reaching out to the DevStudio team. We review all developer feedback, bug reports, and new tool requests within 24 hours.
+              Thank you for reaching out to the mytoolsbox team. We review all developer feedback, bug reports, and new tool requests within 24 hours.
             </p>
             <button
               onClick={() => {

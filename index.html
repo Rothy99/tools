@@ -3,21 +3,72 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mytoolsbox | Free Client-Side Developer Utilities & Studio</title>
+    <title>mytoolsbox | Free Client-Side Developer Utilities & Web Studio</title>
     <meta
       name="description"
-      content="mytoolsbox is a high-performance suite of free, 100% client-side developer tools including JSON Formatter, JWT Decoder, Base64 Converter, Regex Tester, SQL Formatter, and more."
+      content="Secure suite of free, 100% private client-side developer tools. Format JSON, decode JWT, convert Base64, and parse SQL instantly inside your browser."
     />
     <meta
       name="keywords"
       content="developer tools, json formatter, jwt decoder, base64 encoder decoder, regex tester, sql formatter, cron parser, unix timestamp converter, text diff, uuid generator, hash generator, color converter, url encoder, client-side tools, online dev utilities"
     />
     <meta name="robots" content="index, follow" />
+    <meta name="google-site-verification" content="googlef6046046013f5cc8" />
+    <meta name="google-site-verification" content="googlef6046046013f5cc8.html" />
     <meta name="monetag" content="8257ca8c60b75ff420647a99eb81cc50" />
-    <!-- Monetag Vignette Ad Script -->
-    <script>(function(s){s.dataset.zone='11505086',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-    <!-- Monetag Tag Script -->
-    <script src="https://5gvci.com/act/files/tag.min.js?z=11505091" data-cfasync="false" async></script>
+
+    <!-- mytoolsbox Non-Intrusive Monetization Guard -->
+    <script>
+    (function() {
+        const AD_SAFEGUARD = {
+            freeToolsLimit: 2,         // Let them use tools twice completely free
+            maxAdsPerSession: 2,       // Hard cap: Never show more than 2 ad cycles per visit
+            sessionCountKey: 'mtb_success_runs',
+            sessionLimitKey: 'mtb_ad_cycles_shown'
+        };
+
+        window.triggerToolSuccess = function() {
+            let toolsRun = parseInt(sessionStorage.getItem(AD_SAFEGUARD.sessionCountKey)) || 0;
+            let adsShown = parseInt(sessionStorage.getItem(AD_SAFEGUARD.sessionLimitKey)) || 0;
+            
+            toolsRun++;
+            sessionStorage.setItem(AD_SAFEGUARD.sessionCountKey, toolsRun);
+            
+            if (adsShown >= AD_SAFEGUARD.maxAdsPerSession) {
+                console.log('Premium Loyalty Shield: Ad limits reached. Preserving clear workspace.');
+                return;
+            }
+
+            // All 3 ad zones are safely unified here to execute only after 2 successful tool uses
+            if (toolsRun >= AD_SAFEGUARD.freeToolsLimit) {
+                console.log('Value milestone hit. Injecting medium-revenue ad layers safely.');
+                sessionStorage.setItem(AD_SAFEGUARD.sessionLimitKey, adsShown + 1);
+
+                // Injector Component A: Vignette Banner (Zone: 11505086)
+                var vignetteNode = document.createElement('script');
+                vignetteNode.src = 'https://n6wxm.com/vignette.min.js';
+                vignetteNode.dataset.zone = '11505086';
+                vignetteNode.async = true;
+                document.body.appendChild(vignetteNode);
+
+                // Injector Component B: In-Page Push Banner (Zone: 11505091)
+                var tagNode = document.createElement('script');
+                tagNode.src = 'https://5gvci.com/act/files/tag.min.js?z=11505091';
+                tagNode.setAttribute('data-cfasync', 'false');
+                tagNode.async = true;
+                document.body.appendChild(tagNode);
+
+                // Injector Component C: New Additional Format (Zone: 11505519)
+                var additionalNode = document.createElement('script');
+                additionalNode.src = 'https://nap5k.com/tag.min.js';
+                additionalNode.dataset.zone = '11505519';
+                additionalNode.async = true;
+                document.body.appendChild(additionalNode);
+            }
+        };
+    })();
+    </script>
+
     <meta name="theme-color" content="#0f172a" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />

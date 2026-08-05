@@ -3,6 +3,7 @@ import { formatSql } from "../../utils/codeUtils";
 import { SAMPLE_PRESETS } from "../../data/samplePresets";
 import { useSessionStorageString } from "../../hooks/useSessionStorage";
 import { Database, Copy, Check, Trash2, Sparkles } from "lucide-react";
+import { InfoTooltip } from "../common/Tooltip";
 
 export const SqlFormatterTool: React.FC = () => {
   const [sqlInput, setSqlInput] = useSessionStorageString("devstudio_sql_input", SAMPLE_PRESETS.sqlSample);
@@ -28,6 +29,16 @@ export const SqlFormatterTool: React.FC = () => {
           <h2 className="font-bold text-sm text-slate-900 dark:text-white">
             SQL Formatter & Beautifier
           </h2>
+          <InfoTooltip
+            text={
+              <div className="space-y-1">
+                <div className="font-bold text-indigo-300">SQL Formatting Rules</div>
+                <div className="text-[11px] leading-relaxed text-slate-200">
+                  Standardizes SQL syntax by UPPERCASING keywords (<span className="text-amber-300">SELECT, FROM, WHERE, JOIN</span>), indenting clauses, and structuring subqueries for PostgreSQL, MySQL, and SQLite.
+                </div>
+              </div>
+            }
+          />
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">

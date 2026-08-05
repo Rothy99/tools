@@ -3,6 +3,7 @@ import { hexToRgb, rgbToHsl } from "../../utils/codeUtils";
 import { SAMPLE_PRESETS } from "../../data/samplePresets";
 import { useSessionStorageString } from "../../hooks/useSessionStorage";
 import { Palette, Copy, Check } from "lucide-react";
+import { InfoTooltip } from "../common/Tooltip";
 
 export const ColorTool: React.FC = () => {
   const [hex, setHex] = useSessionStorageString("devstudio_color_hex", SAMPLE_PRESETS.colorSample);
@@ -44,6 +45,16 @@ export const ColorTool: React.FC = () => {
             <h2 className="font-bold text-sm text-slate-900 dark:text-white">
               Color Converter & Contrast Studio
             </h2>
+            <InfoTooltip
+              text={
+                <div className="space-y-1">
+                  <div className="font-bold text-indigo-300">WCAG 2.1 Color Contrast</div>
+                  <div className="text-[11px] leading-relaxed text-slate-200">
+                    WCAG AA requires a contrast ratio of at least <span className="text-amber-300 font-bold">4.5:1</span> for normal text and <span className="text-amber-300 font-bold">3:1</span> for large text. AAA requires <span className="text-amber-300 font-bold">7:1</span>.
+                  </div>
+                </div>
+              }
+            />
           </div>
         </div>
 
